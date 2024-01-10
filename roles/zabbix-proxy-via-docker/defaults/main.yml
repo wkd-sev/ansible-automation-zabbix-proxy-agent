@@ -1,0 +1,7 @@
+---
+# defaults file for zabbix-proxy-via-docker
+zabbix_proxy_version:      "6.0"
+zabbix_server_host:        "192.168.31.101"
+zabbix_proxy_hostname:     "hostname"
+src_templates:             "templates/zabbix_proxy_docker.j2"
+dst_folder:                "/opt/zabbix-proxy"

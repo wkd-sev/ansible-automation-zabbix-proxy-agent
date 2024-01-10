@@ -1,0 +1,50 @@
+version: '3.5'
+services:
+  zabbix-proxy-sqlite3-egisz:
+    container_name: zabbix-proxy-egisz
+    image: zabbix/zabbix-proxy-sqlite3:alpine-{{ zabbix_proxy_version }}-latest
+    network_mode: "host"
+    volumes:
+    - /etc/localtime:/etc/localtime:ro
+    - /etc/timezone:/etc/timezone:ro 
+    - ./egisz-{{ zabbix_proxy_hostname }}.psk:/etc/zabbix/egisz.psk
+    ulimits:
+      nproc: 65535
+      nofile:
+        soft: 20000
+        hard: 40000
+    deploy:
+      resources:
+        limits:
+          cpus: '0.70'
+          memory: 512M
+        reservations:
+          cpus: '0.3'
+          memory: 256M
+    environment:
+      ZBX_SERVER_HOST: {{ zabbix_server_host }}
+      ZBX_HOSTNAME: {{ zabbix_proxy_hostname }}
+      ZBX_ENABLEREMOTECOMMANDS: "0"
+      ZBX_PROXYLOCALBUFFER: "4"
+      ZBX_PROXYOFFLINEBUFFER: "24"
+      ZBX_PROXYHEARTBEATFREQUENCY: "60"
+      ZBX_CONFIGFREQUENCY: "300"
+      ZBX_DATASENDERFREQUENCY: "10"
+      ZBX_STARTPOLLERS: "10"
+      ZBX_STARTPOLLERSUNREACHABLE: "2"
+      ZBX_STARTPREPROCESSORS: 3
+      ZBX_STARTTRAPPERS: "8"
+      ZBX_STARTPINGERS: "2"
+      ZBX_STARTDISCOVERERS: "2"
+      ZBX_JAVAGATEWAY_ENABLE: "true"
+      ZBX_JAVAGATEWAY: "127.0.0.1"
+      ZBX_STARTJAVAPOLLERS: "5"
+      ZBX_CACHESIZE: "32M"
+      ZBX_HISTORYCACHESIZE: "64M"
+      ZBX_HISTORYINDEXCACHESIZE: "16M"
+      ZBX_TIMEOUT: "5"
+      ZBX_TLSPSKIDENTITY: {{ zabbix_proxy_hostname }}
+      ZBX_TLSCONNECT: psk
+      ZBX_TLSPSKFILE: /etc/zabbix/egisz.psk
+    stop_grace_period: 30s
+    restart: unless-stopped

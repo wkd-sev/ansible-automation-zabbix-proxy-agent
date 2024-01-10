@@ -1,0 +1,61 @@
+---
+# tasks file for zabbix-proxy-via-docker
+- block: # CentOS #
+    - name: Create folder for docker files
+      file:
+        path: "{{ dst_folder }}"
+        state: directory
+        owner: zabbix
+        group: root
+        mode: 0775
+
+    - name: Copy j2 docker-compose file
+      template: src={{ src_templates }} dest={{ dst_folder }}/zabbix_proxy_docker.yml owner=zabbix group=root mode=0644
+
+    - name: Generate random PSK
+      shell: openssl rand -hex 32
+      register: psk_output
+
+    - name: Append PSK to file
+      lineinfile:
+        path: "{{ dst_folder }}/egisz-{{ zabbix_proxy_hostname }}.psk"
+        line: "{{ psk_output.stdout }}"
+        mode: '0644'
+        create: yes
+        state: present
+
+    - name: Start zabbix-proxy via docker-compose
+      shell: docker-compose -f {{ dst_folder }}/zabbix_proxy_docker.yml up -d
+
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  ignore_errors: yes
+
+- block: # Ubuntu #
+    - name: Create Folder for Docker Files
+      file:
+        path: "{{ dst_folder }}"
+        state: directory
+        owner: zabbix
+        group: root
+        mode: 0775
+
+    - name: Copy j2 docker-compose file
+      template: src={{ src_templates }} dest={{ dst_folder }}/zabbix_proxy_docker.yml owner=zabbix group=root mode=0644
+
+    - name: Generate random PSK
+      shell: openssl rand -hex 32
+      register: psk_output
+
+    - name: Append PSK to file
+      lineinfile:
+        path: "{{ dst_folder }}/egisz-{{ zabbix_proxy_hostname }}.psk"
+        line: "{{ psk_output.stdout }}"
+        mode: '0644'
+        create: yes
+        state: present
+
+    - name: Start zabbix-proxy via docker-compose
+      shell: docker-compose -f {{ dst_folder }}/zabbix_proxy_docker.yml up -d
+
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  ignore_errors: yes

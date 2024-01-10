@@ -1,0 +1,5 @@
+---
+# defaults file for zabbix-agent-linux
+zabbix_agent_server   : "192.168.31.103"
+zabbix_agent_version  : "6.0"
+ubuntu_os_release     : "20.04"

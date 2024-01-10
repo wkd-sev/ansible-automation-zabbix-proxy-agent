@@ -1,0 +1,11 @@
+---
+# vars file for docker_install
+pkgs:
+  - pkg: apt-transport-https
+  - pkg: ca-certificates
+  - pkg: curl
+  - pkg: software-properties-common
+  - pkg: gnupg-agent
+  - pkg: python3-pip
+  - pkg: virtualenv
+  - pkg: python3-setuptools

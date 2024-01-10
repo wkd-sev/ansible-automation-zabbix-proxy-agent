@@ -1,0 +1,61 @@
+---
+# tasks file for zabbix-agent-linux
+- block: # CentOS #
+    - name: Add Zabbix repository
+      command: rpm -ivh https://repo.zabbix.com/zabbix/{{ zabbix_agent_version }}/rhel/7/x86_64/zabbix-release-{{ zabbix_agent_version }}-1.el7.noarch.rpm
+    
+    - name: Install Zabbix-Agent
+      yum: >
+        name=zabbix-agent
+        state=latest
+      
+    - name: Remove Config-File
+      file: >
+        path=/etc/zabbix/zabbix_agentd.conf 
+        state=absent
+      
+    - name: Create new agent config file
+      template: src=templates/zabbix_agentd.conf.j2 dest=/etc/zabbix/zabbix_agentd.conf mode=0755
+    
+    - name: Restart zabbix-agent
+      systemd:
+        name: zabbix-agent
+        state: restarted
+        enabled: yes
+
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+  ignore_errors: yes
+
+
+- block: # Ubuntu #
+    - name: Enable Zabbix repository
+      shell: wget https://repo.zabbix.com/zabbix/{{ zabbix_agent_version }}/ubuntu/pool/main/z/zabbix-release/zabbix-release_{{ zabbix_agent_version }}-1+ubuntu{{ ubuntu_os_release }}_all.deb
+
+    - name: Extract Deb File
+      shell: sudo dpkg -i zabbix-release_{{ zabbix_agent_version }}-1+ubuntu{{ ubuntu_os_release }}_all.deb
+
+    - name: Apt-Get Update
+      apt:
+        update_cache: yes 
+   
+    - name: Install Zabbix-Agent
+      apt: >
+        name=zabbix-agent
+        state=latest
+      
+    - name: Remove Config-File
+      file: >
+        path=/etc/zabbix/zabbix_agentd.conf 
+        state=absent
+      
+    - name: Create new agent config file
+      template: src=templates/zabbix_agentd.conf.j2 dest=/etc/zabbix/zabbix_agentd.conf mode=0755
+    
+    - name: Restart zabbix-agent
+      systemd:
+        name: zabbix-agent
+        state: restarted
+        enabled: yes
+
+  when: ansible_distribution == 'Debian' or ansible_distribution == 'Ubuntu'
+  ignore_errors: yes
